@@ -21,8 +21,7 @@ COLS, ROWS = 252, 151
 W, H = COLS * CELL, ROWS * CELL  # 1260 x 755
 S = W / 1200  # 1200-wide painting coordinates -> SVG units
 BG = "#05070d"
-SHADOW_GAMMA, LOCAL_CONTRAST, LOCAL_RADIUS = 0.62, 0.9, 6  # bring out the dark parts
-PAINT_FLOOR = 0.06  # any cell brighter than this (not pure black) gets at least a small dot
+SHADOW_GAMMA, LOCAL_CONTRAST, LOCAL_RADIUS = 0.85, 0.9, 6  # bring out the dark parts, keep them dark
 DOTS = [1.0, 1.6, 2.3]  # radius of the small, medium and large dot (middle dot, bullet, black circle)
 BAYER = np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]) / 16
 # regions in 1200x720 painting coordinates
@@ -54,7 +53,6 @@ def cells(img):
     v = 0.45 * v + 0.55 * rank  # partial histogram equalization: the dark painting uses all four dot sizes
     bayer = np.tile(BAYER, (ROWS // 4 + 1, COLS // 4 + 1))[:ROWS, :COLS]
     lum = np.clip(v ** 1.1 + (bayer - 0.5) * 0.24, 0, 1)  # ordered dither across the 4 dot levels
-    lum = np.where(v > PAINT_FLOOR, np.maximum(lum, 0.26), lum)  # foliage keeps small dots instead of a hole
     hsv[..., 1] = np.clip(hsv[..., 1] * 1.7, 0, 1)
     hsv[..., 2] = 0.66 + 0.34 * v ** 0.7  # the dot size carries the brightness; keep small dots visible
     color = Image.fromarray((hsv * 255).astype(np.uint8), "HSV").convert("RGB")
