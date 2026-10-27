@@ -128,7 +128,9 @@ def main():
     with open(os.path.join(ROOT, "README.md"), "w") as f:
         f.write('<p align="center">\n  <img src="assets/sierra.svg" width="100%" alt="Animated dot art after '
                 'Albert Bierstadt, Among the Sierra Nevada, California (1868): waterfalls flow, the lake shimmers, '
-                'cloud shadows drift over the valley">\n</p>\n')
+                'cloud shadows drift over the valley">\n</p>\n'
+                '<p align="center"><sub>after Albert Bierstadt, <i>Among the Sierra Nevada, California</i>, 1868, '
+                'Smithsonian American Art Museum</sub></p>\n')
     print("ok", os.path.getsize(OUT) // 1024, "KB")
 
 
