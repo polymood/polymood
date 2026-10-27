@@ -11,7 +11,7 @@ live. A color image (one pixel per cell) paints the dots. All motion is SMIL: sm
 """
 import base64, io, os
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(ROOT, "assets", "bierstadt.jpg")  # 3000x1800, from the SAAM 10500x6298 TIFF
@@ -21,7 +21,6 @@ COLS, ROWS = 252, 151
 W, H = COLS * CELL, ROWS * CELL  # 1260 x 755
 S = W / 1200  # 1200-wide painting coordinates -> SVG units
 BG = "#05070d"
-SHADOW_GAMMA, LOCAL_CONTRAST, LOCAL_RADIUS = 0.85, 0.9, 6  # bring out the dark parts, keep them dark
 DOTS = [1.0, 1.6, 2.3]  # radius of the small, medium and large dot (middle dot, bullet, black circle)
 BAYER = np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]) / 16
 # regions in 1200x720 painting coordinates
@@ -45,10 +44,6 @@ def cells(img):
     v = hsv[..., 2]
     lo, hi = np.percentile(v, [2, 99.6])
     v = np.clip((v - lo) / (hi - lo), 0, 1)
-    # dark areas (the trees on the right): lift the shadows, then add local contrast so foliage and trunks
-    # separate from their surroundings instead of merging into one dark mass
-    blur = np.asarray(Image.fromarray((v * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(LOCAL_RADIUS))) / 255
-    v = np.clip(v ** SHADOW_GAMMA + LOCAL_CONTRAST * (v - blur), 0, 1)
     rank = v.ravel().argsort().argsort().reshape(v.shape) / (v.size - 1)
     v = 0.45 * v + 0.55 * rank  # partial histogram equalization: the dark painting uses all four dot sizes
     bayer = np.tile(BAYER, (ROWS // 4 + 1, COLS // 4 + 1))[:ROWS, :COLS]
