@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="840" height="30" viewBox="0 0 840 30">
-<rect x="1" y="1" width="838" height="28" fill="#000" stroke="#39ff14" stroke-width="2"/>
-<clipPath id="c"><rect x="3" y="3" width="834" height="24"/></clipPath>
-<g clip-path="url(#c)" font-family="'Courier New', Courier, monospace" font-size="15" font-weight="bold" fill="#ffff00">
-  <g><animateTransform attributeName="transform" type="translate" from="840 0" to="-1557 0" dur="24s" repeatCount="indefinite"/>
-    <text x="0" y="20">*** WELCOME TO MY HOMEPAGE *** EOVIEW AND RADVIEW BINARIES ARE IN THEIR RELEASES *** SMITHY IS PRE-ALPHA, HARD HAT AREA *** BEST VIEWED IN 800X600 *** SIGN MY GUESTBOOK *** </text><text x="1557" y="20">*** WELCOME TO MY HOMEPAGE *** EOVIEW AND RADVIEW BINARIES ARE IN THEIR RELEASES *** SMITHY IS PRE-ALPHA, HARD HAT AREA *** BEST VIEWED IN 800X600 *** SIGN MY GUESTBOOK *** </text></g>
-</g>
-</svg>
