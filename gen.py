@@ -6,7 +6,7 @@ Usage: python3 gen.py   (needs Pillow and numpy)
 
 How it works: a hidden brightness image (one pixel per character cell, ordered-dithered) decides the
 dot size of each cell: empty, small, medium or large. The scene animates that brightness image
-(cloud shadows, valley light, falling water, lake ripples, glints), so the dots grow, shrink and flow
+(valley light, falling water, lake ripples, glints), so the dots grow, shrink and flow
 live. A color image (one pixel per cell) paints the dots. All motion is SMIL: smooth, no frames.
 """
 import base64, io, os
@@ -25,10 +25,11 @@ DOTS = [1.0, 1.6, 2.3]  # radius of the small, medium and large dot (middle dot,
 BAYER = np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]) / 16
 # regions in 1200x720 painting coordinates
 WATER = [(0, 553), (860, 553), (845, 585), (700, 622), (600, 650), (300, 656), (0, 642)]
-FALLS = [(240, 195, 252, 330, 1, 0.15), (268, 425, 298, 528, 1, 0.3), (544, 492, 560, 548, 1, 0.45),
-         (676, 470, 692, 550, 1, 0.3), (546, 556, 558, 612, -1, 0.2)]  # x0, y0, x1, y1, direction, strength
+# the two waterfalls as thin streams, one cell wide: x top, y top, x bottom, y bottom, strength
+STREAMS = [(239, 190, 247, 250, 0.35),                                # left fall, upper thread
+           (271, 455, 272, 512, 0.45), (279, 458, 280, 512, 0.4),     # left fall, lower strands
+           (549, 500, 548, 546, 0.55), (553, 497, 553, 546, 0.6)]     # center fall
 GLINTS = [(786, 108), (760, 142), (1128, 150), (905, 190), (845, 128), (470, 560), (520, 566), (610, 562)]
-SHADOWS = [(429, 152, 150, 70, 0), (343, 129, 330, 55, -25), (400, 114, 470, 85, -60)]  # rx, ry (1200 coords), y, seconds, begin
 
 
 def png(img):
@@ -67,18 +68,15 @@ def field():
                    f'<use href="#lum" xlink:href="#lum"><animateTransform attributeName="transform" type="translate" '
                    f'values="0 0;{CELL * 0.8} 0;0 0;{-CELL * 0.8} 0;0 0" dur="5s" begin="{-0.3 * r:.2f}s" '
                    f'repeatCount="indefinite"/></use></svg></g>')
-    # falling water: bright bars scroll down the falls (up in the reflection)
-    for x0, y0, x1, y1, d, k in FALLS:
-        out.append(f'<rect x="{x0 * S:.1f}" y="{y0 * S:.1f}" width="{max(x1 - x0, 8) * S:.1f}" height="{(y1 - y0) * S:.1f}" '
-                   f'fill="url(#fall{d})" opacity="{k}"/>')
-    # valley light breathes, cloud shadows drift, snow and water glint
+    # falling water: bright bars scroll down each stream, each at its own pace
+    for i, (xt, yt, xb, yb, k) in enumerate(STREAMS):
+        w = CELL / S  # one cell, in painting coordinates
+        out.append(f'<polygon points="{poly([(xt - w / 2, yt), (xt + w / 2, yt), (xb + w / 2, yb), (xb - w / 2, yb)])}" '
+                   f'fill="url(#stream{i})" opacity="{k}"/>')
+    # valley light breathes, snow and water glint
     out.append(f'<ellipse cx="{560 * S:.0f}" cy="{290 * S:.0f}" rx="{260 * S / 0.7:.0f}" ry="{185 * S / 0.7:.0f}" fill="url(#sun)" opacity="0.1">'
                f'<animate attributeName="opacity" values="0.05;0.32;0.05" dur="9s" repeatCount="indefinite" calcMode="spline" '
                f'keyTimes="0;0.5;1" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/></ellipse>')
-    for rx, ry, y, dur, begin in SHADOWS:
-        rx, ry = rx * S, ry * S
-        out.append(f'<ellipse cy="{y * S:.0f}" rx="{rx}" ry="{ry}" fill="url(#shade)"><animate attributeName="cx" '
-                   f'from="{-rx}" to="{W + rx}" dur="{dur}s" begin="{begin}s" repeatCount="indefinite"/></ellipse>')
     for i, (x, y) in enumerate(GLINTS):
         out.append(f'<circle cx="{x * S:.1f}" cy="{y * S:.1f}" r="{CELL * 1.2}" fill="#fff" opacity="0"><animate attributeName="opacity" '
                    f'values="0;0;1;0" dur="{3.5 + 0.7 * i:.1f}s" begin="{-1.3 * i:.1f}s" repeatCount="indefinite"/></circle>')
@@ -93,12 +91,12 @@ def svg(lum, color):
             f'image-rendering="optimizeSpeed" style="image-rendering:pixelated"/>',
             f'<clipPath id="lake"><polygon points="{poly(WATER)}"/></clipPath>',
             '<radialGradient id="sun"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>',
-            '<radialGradient id="shade"><stop offset="0" stop-color="#000" stop-opacity="0.55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>',
             f'<g id="field">{field()}</g>']
-    for d in (1, -1):
-        defs.append(f'<pattern id="fall{d}" width="{W}" height="{5 * CELL}" patternUnits="userSpaceOnUse">'
-                    f'<animateTransform attributeName="patternTransform" type="translate" from="0 0" to="0 {d * 5 * CELL}" '
-                    f'dur="0.8s" repeatCount="indefinite"/><rect width="{W}" height="{CELL}" fill="#fff"/></pattern>')
+    for i in range(len(STREAMS)):
+        period = (4 + i % 3) * CELL
+        defs.append(f'<pattern id="stream{i}" width="{W}" height="{period}" patternUnits="userSpaceOnUse">'
+                    f'<animateTransform attributeName="patternTransform" type="translate" from="0 0" to="0 {period}" '
+                    f'dur="{0.7 + 0.13 * i:.2f}s" repeatCount="indefinite"/><rect width="{W}" height="{CELL}" fill="#fff"/></pattern>')
     dots = []
     defs.append(f'<image id="color" href="{png(color)}" width="{W}" height="{H}" preserveAspectRatio="none" '
                 f'image-rendering="optimizeSpeed" style="image-rendering:pixelated"/>')
@@ -128,7 +126,7 @@ def main():
     with open(os.path.join(ROOT, "README.md"), "w") as f:
         f.write('<p align="center">\n  <img src="assets/sierra.svg" width="100%" alt="Animated dot art after '
                 'Albert Bierstadt, Among the Sierra Nevada, California (1868): waterfalls flow, the lake shimmers, '
-                'cloud shadows drift over the valley">\n</p>\n'
+                'the valley light breathes">\n</p>\n'
                 '<p align="center"><sub>after Albert Bierstadt, <i>Among the Sierra Nevada, California</i>, 1868, '
                 'Smithsonian American Art Museum</sub></p>\n')
     print("ok", os.path.getsize(OUT) // 1024, "KB")
