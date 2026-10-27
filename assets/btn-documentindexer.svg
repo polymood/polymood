@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="88" height="31" viewBox="0 0 88 31">
-<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f4f4"/><stop offset="1" stop-color="#a8a8a8"/></linearGradient></defs>
-<rect width="88" height="31" fill="#808080"/><path d="M0.5,30.5 V0.5 H87.5" fill="none" stroke="#fff"/>
-<rect x="2" y="2" width="84" height="27" fill="url(#g)"/><rect x="3" y="3" width="25" height="25" fill="#000" opacity="0.35"/>
-<text x="15.5" y="19" text-anchor="middle" font-family="Verdana, Tahoma, Geneva, 'DejaVu Sans', sans-serif" font-size="9.8" font-weight="bold" fill="#d01010">PDF</text>
-<text x="31" y="14" font-family="Verdana, Tahoma, Geneva, 'DejaVu Sans', sans-serif" font-size="4.5" font-weight="bold" fill="#101060">DOCUMENTINDEXER</text>
-<text x="31" y="24" font-family="Verdana, Tahoma, Geneva, 'DejaVu Sans', sans-serif" font-size="5.7" fill="#101060">PDF FULL TEXT</text>
-</svg>
