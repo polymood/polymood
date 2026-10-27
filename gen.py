@@ -17,8 +17,8 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(ROOT, "assets", "bierstadt.jpg")  # 3000x1800, from the SAAM 10500x6298 TIFF
 OUT = os.path.join(ROOT, "assets", "sierra.svg")
 CELL = 5  # SVG units per character cell, square (the README scales the image to the page width)
-COLS, ROWS = 252, 151
-W, H = COLS * CELL, ROWS * CELL  # 1260 x 755
+COLS, ROWS = 336, 201
+W, H = COLS * CELL, ROWS * CELL  # 1680 x 1005
 S = W / 1200  # 1200-wide painting coordinates -> SVG units
 BG = "#05070d"
 DOTS = [1.0, 1.6, 2.3]  # radius of the small, medium and large dot (middle dot, bullet, black circle)
@@ -28,7 +28,7 @@ WATER = [(0, 553), (860, 553), (845, 585), (700, 622), (600, 650), (300, 656), (
 FALLS = [(240, 195, 252, 330, 1, 0.15), (268, 425, 298, 528, 1, 0.3), (544, 492, 560, 548, 1, 0.45),
          (676, 470, 692, 550, 1, 0.3), (546, 556, 558, 612, -1, 0.2)]  # x0, y0, x1, y1, direction, strength
 GLINTS = [(786, 108), (760, 142), (1128, 150), (905, 190), (845, 128), (470, 560), (520, 566), (610, 562)]
-SHADOWS = [(450, 160, 150, 70, 0), (360, 135, 330, 55, -25), (420, 120, 470, 85, -60)]  # rx, ry, y, seconds, begin
+SHADOWS = [(429, 152, 150, 70, 0), (343, 129, 330, 55, -25), (400, 114, 470, 85, -60)]  # rx, ry (1200 coords), y, seconds, begin
 
 
 def png(img):
@@ -76,6 +76,7 @@ def field():
                f'<animate attributeName="opacity" values="0.05;0.32;0.05" dur="9s" repeatCount="indefinite" calcMode="spline" '
                f'keyTimes="0;0.5;1" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/></ellipse>')
     for rx, ry, y, dur, begin in SHADOWS:
+        rx, ry = rx * S, ry * S
         out.append(f'<ellipse cy="{y * S:.0f}" rx="{rx}" ry="{ry}" fill="url(#shade)"><animate attributeName="cx" '
                    f'from="{-rx}" to="{W + rx}" dur="{dur}s" begin="{begin}s" repeatCount="indefinite"/></ellipse>')
     for i, (x, y) in enumerate(GLINTS):
